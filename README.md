@@ -25,6 +25,7 @@ db.password=tu_contraseña
 4. Compila y ejecuta el proyecto utilizando Maven:
 
 mvn clean install
+
 mvn exec:java -Dexec.mainClass="com.gestioneventos.TicketManagementApp"
 
 ## Uso
