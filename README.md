@@ -17,7 +17,9 @@ Este proyecto es una aplicación de consola en Java para la gestión de eventos,
 3. Configura el archivo dbconfig.properties con los detalles de tu base de datos:
 
 db.url=jdbc:mysql://localhost:3306/tu_base_de_datos
+
 db.user=tu_usuario
+
 db.password=tu_contraseña
 
 4. Compila y ejecuta el proyecto utilizando Maven:
