@@ -33,20 +33,29 @@ mvn exec:java -Dexec.mainClass="com.gestioneventos.TicketManagementApp"
 Al ejecutar la aplicación, verás un menú con las siguientes opciones:
 
 Registrar usuario
+
 Iniciar sesión
+
 Salir
 
 ### Funcionalidades del Comprador
 
 Ver eventos disponibles: Muestra una lista de todos los eventos disponibles.
+
 Comprar ticket: Permite comprar tickets para un evento especificando el ID del evento y la cantidad de tickets.
+
 Ver compras realizadas: Muestra una lista de todas las compras realizadas por el comprador.
+
 Cerrar sesión: Cierra la sesión actual y vuelve al menú principal.
 
 ### Funcionalidades del Organizador
 
 Ver eventos creados: Muestra una lista de todos los eventos creados por el organizador.
+
 Crear evento: Permite crear un nuevo evento proporcionando el nombre, descripción, fecha, cantidad de tickets y precio por ticket.
+
 Modificar evento: Permite modificar un evento existente especificando el ID del evento.
+
 Eliminar evento: Permite eliminar un evento existente especificando el ID del evento.
+
 Cerrar sesión: Cierra la sesión actual y vuelve al menú principal.
