@@ -12,7 +12,7 @@ Este proyecto es una aplicación de consola en Java para la gestión de eventos,
 
 1. Clona el repositorio del proyecto:
 
-2. Configura la base de datos MySQL. Ejecuta el script SQL proporcionado para crear las tablas necesarias. El script se encuentra en el archivo db/schema.sql:
+2. Configura la base de datos MySQL. Ejecuta el script SQL proporcionado para crear las tablas necesarias. El script se encuentra en el archivo db/dbeventos.sql:
 
 3. Configura el archivo dbconfig.properties con los detalles de tu base de datos:
 
