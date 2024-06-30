@@ -28,7 +28,7 @@ CREATE TABLE evento (
     nombre VARCHAR(64) NOT NULL,
     descripcion TEXT NOT NULL,
     fecha DATETIME NOT NULL,
-    estado VARCHAR(20) NOT NULL,
+    estado VARCHAR(20) NOT NULL DEFAULT 'Activo',
     organizador_id INT NOT NULL,
     cantidad_tickets INT NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,

@@ -1,22 +1,15 @@
 package com.gestioneventos;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 import java.util.Scanner;
 
-import com.gestioneventos.compras.Compra;
-import com.gestioneventos.compras.DetalleCompra;
-import com.gestioneventos.eventos.Evento;
-import com.gestioneventos.usuarios.Comprador;
-import com.gestioneventos.usuarios.Organizador;
-import com.gestioneventos.usuarios.Usuario;
+import com.gestioneventos.controller.TicketManagementController;
+import com.gestioneventos.model.eventos.Evento;
+
+import java.util.List;
 
 public class TicketManagementApp {
-
     private static Scanner scanner = new Scanner(System.in);
-    private static Usuario usuarioActual;
+    private static TicketManagementController controller = new TicketManagementController();
 
     public static void main(String[] args) {
         while (true) {
@@ -30,10 +23,10 @@ public class TicketManagementApp {
 
             switch (opcion) {
                 case 1:
-                    registrarUsuario();
+                    mostrarRegistroUsuario();
                     break;
                 case 2:
-                    iniciarSesion();
+                    mostrarInicioSesion();
                     break;
                 case 3:
                     System.out.println("Saliendo...");
@@ -45,7 +38,7 @@ public class TicketManagementApp {
         }
     }
 
-    private static void registrarUsuario() {
+    private static void mostrarRegistroUsuario() {
         System.out.println("Seleccione el tipo de usuario:");
         System.out.println("1. Comprador");
         System.out.println("2. Organizador");
@@ -63,29 +56,21 @@ public class TicketManagementApp {
         System.out.println("Ingrese su DNI:");
         String dni = scanner.nextLine();
 
-        if (tipoUsuario == 1) {
-            Comprador comprador = new Comprador(0, usuario, password, nombre, apellido, dni);
-            comprador.registrarse();
-        } else if (tipoUsuario == 2) {
-            Organizador organizador = new Organizador(0, usuario, password, nombre, apellido, dni);
-            organizador.registrarse();
-        } else {
-            System.out.println("Tipo de usuario no válido.");
-        }
+        controller.registrarUsuario(nombre, apellido, usuario, password, dni, tipoUsuario);
+        System.out.println("Usuario registrado con éxito.");
     }
 
-    private static void iniciarSesion() {
+    private static void mostrarInicioSesion() {
         System.out.println("Ingrese su usuario:");
         String usuario = scanner.nextLine();
         System.out.println("Ingrese su contraseña:");
         String password = scanner.nextLine();
 
-        usuarioActual = Usuario.iniciarSesion(usuario, password);
-
-        if (usuarioActual != null) {
-            if (usuarioActual instanceof Comprador) {
+        if (controller.iniciarSesion(usuario, password)) {
+            System.out.println("Inicio de sesión exitoso");
+            if (controller.esComprador()) {
                 mostrarMenuComprador();
-            } else if (usuarioActual instanceof Organizador) {
+            } else if (controller.esOrganizador()) {
                 mostrarMenuOrganizador();
             }
         } else {
@@ -94,9 +79,6 @@ public class TicketManagementApp {
     }
 
     private static void mostrarMenuComprador() {
-        Comprador comprador = (Comprador) usuarioActual;
-        comprador.cargarComprasRealizadas(); // Cargar compras realizadas
-
         while (true) {
             System.out.println("Seleccione una opción:");
             System.out.println("1. Ver eventos disponibles");
@@ -109,18 +91,13 @@ public class TicketManagementApp {
 
             switch (opcion) {
                 case 1:
-                    comprador.listarEventos();
+                    listarEventos();
                     break;
                 case 2:
-                    System.out.println("Ingrese el ID del evento:");
-                    int eventoId = scanner.nextInt();
-                    System.out.println("Ingrese la cantidad de tickets:");
-                    int cantidad = scanner.nextInt();
-                    scanner.nextLine(); // Consumir el salto de línea
-                    comprador.comprarTicket(eventoId, cantidad);
+                    comprarTicket();
                     break;
                 case 3:
-                    mostrarComprasRealizadas(comprador);
+                    mostrarComprasRealizadas();
                     break;
                 case 4:
                     System.out.println("Cerrando sesión...");
@@ -132,27 +109,40 @@ public class TicketManagementApp {
         }
     }
 
-    private static void mostrarComprasRealizadas(Comprador comprador) {
-        List<Compra> compras = comprador.getComprasRealizadas();
-
-        if (compras.isEmpty()) {
-            System.out.println("No hay compras realizadas.");
-            return;
-        }
-
-        for (Compra compra : compras) {
-            System.out.printf("Compra ID: %d, Fecha: %s, Total: %.2f, Estado: %s%n",
-                    compra.getId(), compra.getFecha().toString(), compra.getTotal(), compra.getEstado());
-
-            for (DetalleCompra detalle : compra.getDetalles()) {
-                System.out.printf("\tEvento: %s, Cantidad: %d, Precio por entrada: %.2f%n",
-                        detalle.getNombreEvento(), detalle.getCantidad(), detalle.getPrecioUnitario());
+    private static void listarEventos() {
+        List<Evento> eventos = controller.listarEventos();
+        if (eventos == null || eventos.isEmpty()) {
+            System.out.println("No hay eventos disponibles.");
+        } else {
+            for (Evento evento : eventos) {
+                System.out.printf(
+                        "ID: %d, Nombre: %s, Descripción: %s, Fecha: %s, Tickets Disponibles: %d, Precio por Ticket: %.2f%n",
+                        evento.getId(), evento.getNombre(), evento.getDescripcion(), evento.getFecha().toString(),
+                        evento.getCantidadTickets(), evento.getPrecioTicket());
             }
         }
     }
 
+    private static void comprarTicket() {
+        System.out.println("Ingrese el ID del evento:");
+        int eventoId = scanner.nextInt();
+        System.out.println("Ingrese la cantidad de tickets:");
+        int cantidad = scanner.nextInt();
+        scanner.nextLine(); // Consumir el salto de línea
+
+        if (controller.comprarTicket(eventoId, cantidad)) {
+            System.out.println("Compra realizada con éxito.");
+        } else {
+            System.out.println("Error al realizar la compra.");
+        }
+    }
+
+    private static void mostrarComprasRealizadas() {
+        String detallesCompras = controller.obtenerDetallesCompra();
+        System.out.println(detallesCompras);
+    }
+
     private static void mostrarMenuOrganizador() {
-        Organizador organizador = (Organizador) usuarioActual;
         while (true) {
             System.out.println("Seleccione una opción:");
             System.out.println("1. Ver eventos creados");
@@ -166,57 +156,16 @@ public class TicketManagementApp {
 
             switch (opcion) {
                 case 1:
-                    organizador.listarEventos();
+                    listarEventos();
                     break;
                 case 2:
-                    System.out.println("Ingrese el nombre del evento:");
-                    String nombre = scanner.nextLine();
-                    System.out.println("Ingrese la descripción del evento:");
-                    String descripcion = scanner.nextLine();
-                    System.out.println("Ingrese la fecha del evento (YYYY-MM-DD HH:MM:SS):");
-                    String fechaStr = scanner.nextLine();
-                    System.out.println("Ingrese la cantidad de tickets:");
-                    int cantidadTickets = scanner.nextInt();
-                    System.out.println("Ingrese el precio de cada ticket:");
-                    double precioTicket = scanner.nextDouble();
-                    scanner.nextLine(); // Consumir el salto de línea
-                    try {
-                        Date fecha = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(fechaStr);
-                        Evento evento = new Evento(nombre, descripcion, fecha, cantidadTickets, precioTicket);
-                        organizador.crearEvento(evento);
-                    } catch (ParseException e) {
-                        System.out.println("Formato de fecha incorrecto.");
-                    }
+                    mostrarCrearEvento();
                     break;
                 case 3:
-                    System.out.println("Ingrese el ID del evento a modificar:");
-                    int eventoIdModificar = scanner.nextInt();
-                    scanner.nextLine(); // Consumir el salto de línea
-                    System.out.println("Ingrese el nuevo nombre del evento:");
-                    String nuevoNombre = scanner.nextLine();
-                    System.out.println("Ingrese la nueva descripción del evento:");
-                    String nuevaDescripcion = scanner.nextLine();
-                    System.out.println("Ingrese la nueva fecha del evento (YYYY-MM-DD HH:MM:SS):");
-                    String nuevaFechaStr = scanner.nextLine();
-                    System.out.println("Ingrese la nueva cantidad de tickets:");
-                    int nuevaCantidadTickets = scanner.nextInt();
-                    System.out.println("Ingrese el nuevo precio de cada ticket:");
-                    double nuevoPrecioTicket = scanner.nextDouble();
-                    scanner.nextLine(); // Consumir el salto de línea
-                    try {
-                        Date nuevaFecha = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(nuevaFechaStr);
-                        Evento eventoModificado = new Evento(nuevoNombre, nuevaDescripcion, nuevaFecha,
-                                nuevaCantidadTickets, nuevoPrecioTicket);
-                        eventoModificado.setId(eventoIdModificar); // Asignar ID al evento modificado
-                        organizador.modificarEvento(eventoModificado);
-                    } catch (ParseException e) {
-                        System.out.println("Formato de fecha incorrecto.");
-                    }
+                    mostrarModificarEvento();
                     break;
                 case 4:
-                    System.out.println("Ingrese el ID del evento a eliminar:");
-                    int eventoIdEliminar = scanner.nextInt();
-                    organizador.eliminarEvento(eventoIdEliminar);
+                    mostrarEliminarEvento();
                     break;
                 case 5:
                     System.out.println("Cerrando sesión...");
@@ -226,5 +175,52 @@ public class TicketManagementApp {
                     break;
             }
         }
+    }
+
+    private static void mostrarCrearEvento() {
+        System.out.println("Ingrese el nombre del evento:");
+        String nombre = scanner.nextLine();
+        System.out.println("Ingrese la descripción del evento:");
+        String descripcion = scanner.nextLine();
+        System.out.println("Ingrese la fecha del evento (YYYY-MM-DD HH:MM:SS):");
+        String fechaStr = scanner.nextLine();
+        System.out.println("Ingrese la cantidad de tickets:");
+        int cantidadTickets = scanner.nextInt();
+        System.out.println("Ingrese el precio de cada ticket:");
+        double precioTicket = scanner.nextDouble();
+        scanner.nextLine(); // Consumir el salto de línea
+
+        String resultado = controller.crearEvento(nombre, descripcion, fechaStr, cantidadTickets, precioTicket);
+        System.out.println(resultado);
+    }
+
+    private static void mostrarModificarEvento() {
+        System.out.println("Ingrese el ID del evento a modificar:");
+        int eventoIdModificar = scanner.nextInt();
+        scanner.nextLine(); // Consumir el salto de línea
+        System.out.println("Ingrese el nuevo nombre del evento:");
+        String nuevoNombre = scanner.nextLine();
+        System.out.println("Ingrese la nueva descripción del evento:");
+        String nuevaDescripcion = scanner.nextLine();
+        System.out.println("Ingrese la nueva fecha del evento (YYYY-MM-DD HH:MM:SS):");
+        String nuevaFechaStr = scanner.nextLine();
+        System.out.println("Ingrese la nueva cantidad de tickets:");
+        int nuevaCantidadTickets = scanner.nextInt();
+        System.out.println("Ingrese el nuevo precio de cada ticket:");
+        double nuevoPrecioTicket = scanner.nextDouble();
+        scanner.nextLine(); // Consumir el salto de línea
+
+        String resultado = controller.modificarEvento(eventoIdModificar, nuevoNombre, nuevaDescripcion, nuevaFechaStr,
+                nuevaCantidadTickets, nuevoPrecioTicket);
+        System.out.println(resultado);
+    }
+
+    private static void mostrarEliminarEvento() {
+        System.out.println("Ingrese el ID del evento a eliminar:");
+        int eventoIdEliminar = scanner.nextInt();
+        scanner.nextLine(); // Consumir el salto de línea
+
+        String resultado = controller.eliminarEvento(eventoIdEliminar);
+        System.out.println(resultado);
     }
 }

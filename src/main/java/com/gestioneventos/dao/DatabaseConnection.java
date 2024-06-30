@@ -1,4 +1,4 @@
-package com.gestioneventos;
+package com.gestioneventos.dao;
 
 import java.io.IOException;
 import java.io.InputStream;

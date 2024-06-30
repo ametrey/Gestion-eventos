@@ -1,38 +1,34 @@
-package com.gestioneventos.compras;
+package com.gestioneventos.model.compras;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.gestioneventos.usuarios.Comprador;
-
 public class Compra {
     private int id;
-    private Comprador comprador;
+    private int usuarioId;
     private Date fecha;
     private double total;
     private String estado;
     private List<DetalleCompra> detalles;
 
-    public Compra(int id, Comprador comprador, Date fecha, double total, String estado) {
-        this.id = id;
-        this.comprador = comprador;
+    public Compra(int usuarioId, Date fecha, double total, String estado) {
+        this.usuarioId = usuarioId;
         this.fecha = fecha;
         this.total = total;
         this.estado = estado;
-        this.detalles = new ArrayList<>();
     }
 
-    public void agregarDetalle(int eventoId, int cantidad, double precioUnitario, String nombreEvento) {
-        this.detalles.add(new DetalleCompra(eventoId, cantidad, precioUnitario, nombreEvento));
-    }
-
+    // Getters y Setters
     public int getId() {
         return id;
     }
 
-    public Comprador getComprador() {
-        return comprador;
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getUsuarioId() {
+        return usuarioId;
     }
 
     public Date getFecha() {
@@ -49,5 +45,9 @@ public class Compra {
 
     public List<DetalleCompra> getDetalles() {
         return detalles;
+    }
+
+    public void setDetalles(List<DetalleCompra> detalles) {
+        this.detalles = detalles;
     }
 }
